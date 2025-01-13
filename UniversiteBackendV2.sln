@@ -8,9 +8,20 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntryPoints", "EntryPoints"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{E818A9F4-9625-4A17-83BD-997CCFD25AEA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UniversiteDomain", "UniversiteDomain\UniversiteDomain.csproj", "{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1} = {14C3E3D5-AE3C-4901-9D51-A69A86609E3B}
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{61AFD8FD-8BEC-4BD1-BDA7-2D5FE0FAA0C1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
