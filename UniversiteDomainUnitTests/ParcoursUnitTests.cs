@@ -1,7 +1,9 @@
-﻿using Moq;
+﻿using System.Linq.Expressions;
+using Moq;
 using UniversiteDomain.DataAdapters;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
+using UniversiteDomain.Exceptions.ParcoursExceptions;
 using UniversiteDomain.UseCases.ParcoursUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.EtudiantDansParcours;
 using UniversiteDomain.UseCases.ParcoursUseCases.UeDansParcours;
@@ -54,59 +56,75 @@ public class ParcoursUnitTests
     }
     
     [Test]
-    public async Task AddEtudiantDansParcoursUseCase()
+    public async Task AddUeDansParcoursUseCaseTest()
     {
-        long idEtudiant = 1;
+        long idUe = 1;
         long idParcours = 3;
-        Etudiant etudiant= new Etudiant { Id = 1, NumEtud = "1", Nom = "nom1", Prenom = "prenom1", Email = "1" };
-        Parcours parcours = new Parcours{Id=3, NomParcours = "Ue 3", AnneeFormation = 1};
-        
-        // On initialise des faux repositories
-        var mockEtudiant = new Mock<IEtudiantRepository>();
-        var mockParcours = new Mock<IParcoursRepository>();
-        List<Etudiant> etudiants = new List<Etudiant>();
-        etudiants.Add(new Etudiant{Id=1});
-        mockEtudiant
-            .Setup(repo=>repo.FindByConditionAsync(e=>e.Id.Equals(idEtudiant)))
-            .ReturnsAsync(etudiants);
 
-        List<Parcours> parcourses = new List<Parcours>();
-        parcourses.Add(parcours);
-        
-        List<Parcours> parcoursFinaux = new List<Parcours>();
-        Parcours parcoursFinal = parcours;
-        parcoursFinal.Inscrits.Add(etudiant);
-        parcoursFinaux.Add(parcours);
-        
-        mockParcours
-            .Setup(repo=>repo.FindByConditionAsync(e=>e.Id.Equals(idParcours)))
-            .ReturnsAsync(parcourses);
-        mockParcours
-            .Setup(repo => repo.AddEtudiantAsync(idParcours, idEtudiant))
-            .ReturnsAsync(parcoursFinal);
-        
-        // Création d'une fausse factory qui contient les faux repositories
+        // Création d'une UE et d'un parcours
+        Ue ue = new Ue { Id = idUe, NumeroUe = "UE1", Intitule = "Intitulé UE 1" };
+        Parcours parcoursSansUe = new Parcours
+        {
+            Id = idParcours,
+            NomParcours = "Parcours Test",
+            AnneeFormation = 2,
+            UesEnseignees = new List<Ue>() // Liste vide au départ
+        };
+
+        Parcours parcoursAvecUe = new Parcours
+        {
+            Id = idParcours,
+            NomParcours = "Parcours Test",
+            AnneeFormation = 2,
+            UesEnseignees = new List<Ue> { ue } // UE ajoutée
+        };
+
+        // Mock des repositories
+        var mockUeRepository = new Mock<IUeRepository>();
+        var mockParcoursRepository = new Mock<IParcoursRepository>();
+
+        // Simuler la recherche de l'UE
+        mockUeRepository
+            .Setup(repo => repo.FindByConditionAsync(It.IsAny<Expression<Func<Ue, bool>>>()))
+            .ReturnsAsync(new List<Ue> { ue });
+
+        // Simuler la recherche du parcours
+        mockParcoursRepository
+            .SetupSequence(repo => repo.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()))
+            // 1ère recherche : Parcours sans UE
+            .ReturnsAsync(new List<Parcours> { parcoursSansUe })
+            // 2ème recherche : Parcours avec UE ajoutée
+            .ReturnsAsync(new List<Parcours> { parcoursAvecUe });
+
+        // Simuler l'ajout de l'UE au parcours
+        mockParcoursRepository
+            .Setup(repo => repo.AddUeAsync(idParcours, idUe))
+            .ReturnsAsync(parcoursAvecUe);
+
         var mockFactory = new Mock<IRepositoryFactory>();
-        mockFactory.Setup(facto=>facto.EtudiantRepository()).Returns(mockEtudiant.Object);
-        mockFactory.Setup(facto=>facto.ParcoursRepository()).Returns(mockParcours.Object);
-        
-        // Création du use case en utilisant le mock comme datasource
-        AddEtudiantDansParcoursUseCase useCase=new AddEtudiantDansParcoursUseCase(mockFactory.Object);
-        
-        // Appel du use case
-        var parcoursTest=await useCase.ExecuteAsync(idParcours, idEtudiant);
-        // Vérification du résultat
-        Assert.That(parcoursTest.Id, Is.EqualTo(parcoursFinal.Id));
-        Assert.That(parcoursTest.Inscrits, Is.Not.Null);
-        Assert.That(parcoursTest.Inscrits.Count, Is.EqualTo(1));
-        Assert.That(parcoursTest.Inscrits[0].Id, Is.EqualTo(idEtudiant));
+        mockFactory.Setup(facto => facto.UeRepository()).Returns(mockUeRepository.Object);
+        mockFactory.Setup(facto => facto.ParcoursRepository()).Returns(mockParcoursRepository.Object);
+
+        // Création du use case
+        AddUeDansParcoursUseCase useCase = new AddUeDansParcoursUseCase(mockFactory.Object);
+
+        // Étape 1 : Ajout réussi
+        var result = await useCase.ExecuteAsync(idParcours, idUe);
+        Assert.That(result.Id, Is.EqualTo(parcoursAvecUe.Id));
+        Assert.That(result.UesEnseignees, Is.Not.Null);
+        Assert.That(result.UesEnseignees.Count, Is.EqualTo(1));
+        Assert.That(result.UesEnseignees[0].Id, Is.EqualTo(ue.Id));
+
+        // Étape 2 : Ajout en doublon (doit lever une exception)
+        var ex = Assert.ThrowsAsync<DuplicateUeDansParcoursException>(async () =>
+            await useCase.ExecuteAsync(idParcours, idUe));
+        Assert.That(ex.Message, Is.EqualTo($"{idUe} est déjà présente dans le parcours : {idParcours}"));
+
+        // Vérification des appels des mocks
+        mockUeRepository.Verify(repo => repo.FindByConditionAsync(It.IsAny<Expression<Func<Ue, bool>>>()), Times.Exactly(2));
+        mockParcoursRepository.Verify(repo => repo.FindByConditionAsync(It.IsAny<Expression<Func<Parcours, bool>>>()), Times.Exactly(2));
+        mockParcoursRepository.Verify(repo => repo.AddUeAsync(idParcours, idUe), Times.Once);
     }
 
-    [Test]
-    public async Task AddUeDansParcoursUseCase()
-    {
-        
-        //TODO: Ecrire le test unitaire pour AddUeDansParcoursUseCase (Faut que j'aille dodo il est bientôt 1H mdr)
-    }
 
 }
