@@ -26,7 +26,7 @@ namespace UniversiteRestApi.Controllers
 
         // POST api/<EtudiantController>
         [HttpPost]
-        public async void Post([FromBody] Etudiant etudiant)
+        public async Task PostAsync([FromBody] Etudiant etudiant)
         {
             CreateEtudiantUseCase uc=new CreateEtudiantUseCase(repositoryFactory);
             await uc.ExecuteAsync(etudiant);
