@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using UniversiteDomain.DataAdapters;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
+using UniversiteDomain.Entities;
 using UniversiteEFDataProvider.Data;
 using UniversiteEFDataProvider.Entities;
 using UniversiteEFDataProvider.Repositories;
 
 namespace UniversiteEFDataProvider.RepositoryFactories;
 
-public class RepositoryFactory (UniversiteDbContext context): IRepositoryFactory
+public class RepositoryFactory (UniversiteDbContext context, 
+    UserManager<UniversiteUser> _userManager,
+    RoleManager<UniversiteRole> _roleManager): IRepositoryFactory
 {
     private IParcoursRepository? _parcours;
     private IEtudiantRepository? _etudiants;
@@ -57,7 +60,8 @@ public class RepositoryFactory (UniversiteDbContext context): IRepositoryFactory
     {
         if (_universiteRoles == null)
         {
-            _universiteRoles = new UniversiteRoleRepository(context ?? throw new InvalidOperationException());
+            _universiteRoles = new UniversiteRoleRepository(context ?? throw new InvalidOperationException(),
+                _roleManager ?? throw new InvalidOperationException());
         }
         return _universiteRoles;
     }
@@ -66,7 +70,9 @@ public class RepositoryFactory (UniversiteDbContext context): IRepositoryFactory
     {
         if (_universiteUsers == null)
         {
-            _universiteUsers = new UniversiteUserRepository(context ?? throw new InvalidOperationException());
+            _universiteUsers = new UniversiteUserRepository(context ?? throw new InvalidOperationException(),
+                _userManager ?? throw new InvalidOperationException(),
+                _roleManager ?? throw new InvalidOperationException());
         }
         return _universiteUsers;
     }

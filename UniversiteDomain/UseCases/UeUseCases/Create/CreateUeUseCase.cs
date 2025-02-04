@@ -10,7 +10,8 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
     public async Task<Ue> ExecuteAsync(Ue ue)
     {
         await CheckBusinessRules(ue);
-        await repositoryFactory.UeRepository().AddAsync(ue);
+        //TODO: Vérifier que CreateAsync fonctionne car de base c'était AddAsync()
+        await repositoryFactory.UeRepository().CreateAsync(ue);
         await repositoryFactory.SaveChangesAsync();
         return ue;
     }
