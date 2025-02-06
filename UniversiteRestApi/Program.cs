@@ -26,6 +26,8 @@ String connectionString = builder.Configuration.GetConnectionString("MySqlConnec
 builder.Services.AddDbContext<UniversiteDbContext>(options =>options.UseMySQL(connectionString));
 // La factory est rajoutée dans les services de l'application, toujours prête à être utilisée par injection de dépendances
 builder.Services.AddScoped<IRepositoryFactory, RepositoryFactory>();
+builder.Services.AddScoped<RoleManager<UniversiteRole>>();
+builder.Services.AddScoped<UserManager<UniversiteUser>>();
 
 // Sécurisation
 builder.Services.AddAuthorization();
@@ -34,7 +36,7 @@ builder.Services.AddAuthentication(IdentityConstants.ApplicationScheme)
     .AddBearerToken(IdentityConstants.BearerScheme);
 
 builder.Services.AddIdentityCore<UniversiteUser>()
-    .AddRoles<IdentityRole>()
+    .AddRoles<UniversiteRole>()
     .AddEntityFrameworkStores<UniversiteDbContext>() // Ici, on stocke les users dans la même bd que le reste
     .AddApiEndpoints();
 

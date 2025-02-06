@@ -2,28 +2,26 @@
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
 
-namespace UniversiteDomain.UseCases.EtudiantUseCases.Delete;
+namespace UniversiteDomain.UseCases.EtudiantUseCases.Get;
 
-public class DeleteEtudiantUseCase(IRepositoryFactory factory)
+public class GetTousLesEtudiantsUseCase(IRepositoryFactory factory)
 {
-    //TODO: Vérifier car je suis crevé mdr
-    public async Task<bool> ExecuteAsync(long idEtudiant)
+    public async Task<List<Etudiant>?> ExecuteAsync()
     {
         await CheckBusinessRules();
-        bool success = factory.EtudiantRepository().DeleteAsync(idEtudiant).IsCompletedSuccessfully;
-        await factory.SaveChangesAsync();
-        return success;
+        List<Etudiant> etudiants = await factory.EtudiantRepository().FindAllAsync();
+        return etudiants;
     }
+    
     private async Task CheckBusinessRules()
     {
         ArgumentNullException.ThrowIfNull(factory);
         IEtudiantRepository etudiantRepository=factory.EtudiantRepository();
         ArgumentNullException.ThrowIfNull(etudiantRepository);
     }
+    
     public bool IsAuthorized(string role)
     {
         return role.Equals(Roles.Scolarite) || role.Equals(Roles.Responsable);
     }
-    
-    
 }
