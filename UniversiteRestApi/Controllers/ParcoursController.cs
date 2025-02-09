@@ -7,6 +7,7 @@ using UniversiteDomain.UseCases.ParcoursUseCases.Get;
 using UniversiteDomain.UseCases.ParcoursUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.Update;
 using UniversiteDomain.UseCases.ParcoursUseCases.Delete;
+using UniversiteDomain.UseCases.ParcoursUseCases.EtudiantDansParcours;
 
 namespace UniversiteRestApi.Controllers
 {
@@ -14,16 +15,16 @@ namespace UniversiteRestApi.Controllers
     [ApiController]
     public class ParcoursController(IRepositoryFactory repositoryFactory) : ControllerBase
     {
-        [HttpGet]
-        public async Task<ActionResult<List<ParcoursDto>>> GetAllParcours()
+        [HttpGet] 
+        public async Task<ActionResult<List<ParcoursDto>>> GetAsync()
         {
-            GetAllParcoursUseCase uc = new GetAllParcoursUseCase(repositoryFactory);
+            GetTousLesParcoursUseCase uc = new GetTousLesParcoursUseCase(repositoryFactory);
             List<Parcours> parcours = await uc.ExecuteAsync();
-            return ParcoursDto.ToDtos(parcours);
+            return new ParcoursDto().ToDtos(parcours);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<ParcoursDto>> GetParcoursById(long id)
+        public async Task<ActionResult<ParcoursDto>> GetUnParcours(long id)
         {
             GetParcoursByIdUseCase uc = new GetParcoursByIdUseCase(repositoryFactory);
             var parcours = await uc.ExecuteAsync(id);
@@ -31,7 +32,7 @@ namespace UniversiteRestApi.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ParcoursDto>> AddParcours([FromBody] ParcoursDto parcoursDto)
+        public async Task<ActionResult<ParcoursDto>> PostAsync([FromBody] ParcoursDto parcoursDto)
         {
             CreateParcoursUseCase uc = new CreateParcoursUseCase(repositoryFactory);
             Parcours parcours = await uc.ExecuteAsync(parcoursDto.ToEntity());
@@ -39,7 +40,7 @@ namespace UniversiteRestApi.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateParcours(long id, [FromBody] ParcoursDto parcoursDto)
+        public async Task<IActionResult> PutAsync(long id, [FromBody] ParcoursDto parcoursDto)
         {
             if (id != parcoursDto.Id) return BadRequest();
             UpdateParcoursUseCase uc = new UpdateParcoursUseCase(repositoryFactory);
@@ -48,7 +49,7 @@ namespace UniversiteRestApi.Controllers
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteParcours(long id)
+        public async Task<IActionResult> DeleteAsync(long id)
         {
             DeleteParcoursUseCase uc = new DeleteParcoursUseCase(repositoryFactory);
             await uc.ExecuteAsync(id);
@@ -58,7 +59,7 @@ namespace UniversiteRestApi.Controllers
         [HttpPost("{parcoursId}/etudiant/{etudiantId}")]
         public async Task<IActionResult> AddEtudiantToParcours(long parcoursId, long etudiantId)
         {
-            AddEtudiantToParcoursUseCase uc = new AddEtudiantToParcoursUseCase(repositoryFactory);
+            AddEtudiantDansParcoursUseCase uc = new AddEtudiantDansParcoursUseCase(repositoryFactory);
             await uc.ExecuteAsync(parcoursId, etudiantId);
             return NoContent();
         }

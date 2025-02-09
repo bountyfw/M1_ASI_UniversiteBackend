@@ -11,6 +11,7 @@ public class UpdateEtudiantUseCase(IRepositoryFactory repositoryFactory)
     {
         await CheckBusinessRules();
         await repositoryFactory.EtudiantRepository().UpdateAsync(etudiant);
+        await repositoryFactory.SaveChangesAsync();
         return etudiant;
     }
     

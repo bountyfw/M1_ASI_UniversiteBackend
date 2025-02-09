@@ -10,10 +10,15 @@ public class ParcoursDto
 
     public ParcoursDto ToDto(Parcours parcours)
     {
-        this.Id = parcours.Id;
-        this.NomParcours = parcours.NomParcours;
-        this.AnneeFormation = parcours.AnneeFormation;
+        Id = parcours.Id;
+        NomParcours = parcours.NomParcours;
+        AnneeFormation = parcours.AnneeFormation;
         return this;
+    }
+
+    public List<ParcoursDto> ToDtos(List<Parcours> parcours)
+    {
+        return parcours.Select(p => new ParcoursDto().ToDto(p)).ToList();
     }
     
     public Parcours ToEntity()
