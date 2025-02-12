@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Dtos;
-using UniversiteDomain.Dtos.Parcours;
 using UniversiteDomain.Entities;
 using UniversiteDomain.UseCases.ParcoursUseCases.Get;
 using UniversiteDomain.UseCases.ParcoursUseCases.Create;
@@ -28,7 +27,7 @@ namespace UniversiteRestApi.Controllers
         {
             GetParcoursByIdUseCase uc = new GetParcoursByIdUseCase(repositoryFactory);
             var parcours = await uc.ExecuteAsync(id);
-            return parcours != null ? Ok(ParcoursDto.ToDto(parcours)) : NotFound();
+            return parcours != null ? Ok(new ParcoursDto().ToDto(parcours)) : NotFound();
         }
 
         [HttpPost]
@@ -36,7 +35,7 @@ namespace UniversiteRestApi.Controllers
         {
             CreateParcoursUseCase uc = new CreateParcoursUseCase(repositoryFactory);
             Parcours parcours = await uc.ExecuteAsync(parcoursDto.ToEntity());
-            return CreatedAtAction(nameof(GetParcoursById), new { id = parcours.Id }, ParcoursDto.ToDto(parcours));
+            return CreatedAtAction(nameof(GetUnParcours), new { id = parcours.Id }, new ParcoursDto().ToDto(parcours));
         }
 
         [HttpPut("{id}")]
