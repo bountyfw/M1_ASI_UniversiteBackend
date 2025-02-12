@@ -5,22 +5,22 @@ using UniversiteDomain.Exceptions.EtudiantExceptions;
 
 namespace UniversiteDomain.UseCases.NoteUseCases.Get;
 
-public class GetNotesByEtudiantUseCase(IRepositoryFactory factory)
+public class GetNotesByEtudiantUseCase(IRepositoryFactory factoryFactory)
 {
     public async Task<List<Note>> ExecuteAsync(long etudiantId)
     {
         await CheckBusinessRules();
-        IUniversiteUser? user = await factory.UniversiteUserRepository().FindAsync(etudiantId);
+        IUniversiteUser? user = await factoryFactory.UniversiteUserRepository().FindAsync(etudiantId);
         if (user==null) throw new EtudiantNotFoundException("L'utilisateur n'existe pas");
         
-        List<Note> notes = await factory.NoteRepository().FindByConditionAsync(n => n.Etudiant.Id.Equals(etudiantId));
+        List<Note> notes = await factoryFactory.NoteRepository().FindByConditionAsync(n => n.Etudiant.Id.Equals(etudiantId));
         return notes;
     }
     
     private async Task CheckBusinessRules()
     {
-        ArgumentNullException.ThrowIfNull(factory);
-        INoteRepository noteRepository=factory.NoteRepository();
+        ArgumentNullException.ThrowIfNull(factoryFactory);
+        INoteRepository noteRepository=factoryFactory.NoteRepository();
         ArgumentNullException.ThrowIfNull(noteRepository);
     }
     

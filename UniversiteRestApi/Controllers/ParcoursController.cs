@@ -34,7 +34,16 @@ namespace UniversiteRestApi.Controllers
         public async Task<ActionResult<ParcoursDto>> PostAsync([FromBody] ParcoursDto parcoursDto)
         {
             CreateParcoursUseCase uc = new CreateParcoursUseCase(repositoryFactory);
-            Parcours parcours = await uc.ExecuteAsync(parcoursDto.ToEntity());
+            Parcours parcours = parcoursDto.ToEntity();
+            try
+            {
+                await uc.ExecuteAsync(parcours);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(nameof(e), e.Message);
+                return ValidationProblem();
+            }
             return CreatedAtAction(nameof(GetUnParcours), new { id = parcours.Id }, new ParcoursDto().ToDto(parcours));
         }
 
@@ -43,7 +52,16 @@ namespace UniversiteRestApi.Controllers
         {
             if (id != parcoursDto.Id) return BadRequest();
             UpdateParcoursUseCase uc = new UpdateParcoursUseCase(repositoryFactory);
-            await uc.ExecuteAsync(parcoursDto.ToEntity());
+            Parcours parcours = parcoursDto.ToEntity();
+            try
+            {
+                await uc.ExecuteAsync(parcours);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(nameof(e), e.Message);
+                return ValidationProblem();
+            }
             return NoContent();
         }
 
@@ -51,7 +69,15 @@ namespace UniversiteRestApi.Controllers
         public async Task<IActionResult> DeleteAsync(long id)
         {
             DeleteParcoursUseCase uc = new DeleteParcoursUseCase(repositoryFactory);
-            await uc.ExecuteAsync(id);
+            try
+            {
+                await uc.ExecuteAsync(id);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(nameof(e), e.Message);
+                return ValidationProblem();
+            }
             return NoContent();
         }
 
@@ -59,7 +85,15 @@ namespace UniversiteRestApi.Controllers
         public async Task<IActionResult> AddEtudiantToParcours(long parcoursId, long etudiantId)
         {
             AddEtudiantDansParcoursUseCase uc = new AddEtudiantDansParcoursUseCase(repositoryFactory);
-            await uc.ExecuteAsync(parcoursId, etudiantId);
+            try
+            {
+                await uc.ExecuteAsync(parcoursId, etudiantId);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(nameof(e), e.Message);
+                return ValidationProblem();
+            }
             return NoContent();
         }
     }

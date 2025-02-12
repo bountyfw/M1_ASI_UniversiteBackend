@@ -31,7 +31,7 @@ public class UniversiteUserRepository(UniversiteDbContext context, UserManager<U
     
     public async Task UpdateAsync(Etudiant etudiant)
     {
-        //TODO: Trouver une solution car ce code est dégueulasse
+        // Peut ne pas fonctionner car problèmes en suivant le TD.
         UniversiteUser? user = await context.UniversiteUsers.Include(u => u.Etudiant)
             .FirstOrDefaultAsync(u => u.EtudiantId == etudiant.Id);
         if (user == null) return;

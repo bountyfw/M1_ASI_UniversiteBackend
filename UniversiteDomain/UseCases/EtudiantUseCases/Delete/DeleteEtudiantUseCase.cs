@@ -6,7 +6,7 @@ namespace UniversiteDomain.UseCases.EtudiantUseCases.Delete;
 
 public class DeleteEtudiantUseCase(IRepositoryFactory factory)
 {
-    //TODO: Vérifier car je suis crevé mdr
+    //Il y a un problème qui s'est produit en suivant le TD, je n'ai pas eu le temps de le résoudre
     public async Task<bool> ExecuteAsync(long idEtudiant)
     {
         await CheckBusinessRules();
