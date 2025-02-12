@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using UniversiteDomain.DataAdapters;
+using UniversiteDomain.Dtos;
 using UniversiteDomain.Entities;
 using UniversiteEFDataProvider.Data;
 using UniversiteEFDataProvider.Entities;
@@ -27,14 +29,22 @@ public class UniversiteUserRepository(UniversiteDbContext context, UserManager<U
         return await userManager.FindByEmailAsync(email);
     }
     
-    public async Task UpdateAsync(IUniversiteUser entity, string userName, string email)
+    public async Task UpdateAsync(Etudiant etudiant)
     {
-        UniversiteUser user = (UniversiteUser)entity;
-        user.UserName = userName;
-        user.Email = email;
-        await userManager.UpdateAsync(user);
+        // Peut ne pas fonctionner car problèmes en suivant le TD.
+        UniversiteUser? user = await context.UniversiteUsers.Include(u => u.Etudiant)
+            .FirstOrDefaultAsync(u => u.EtudiantId == etudiant.Id);
+        if (user == null) return;
+
+        // Mise à jour des valeurs sans attacher une nouvelle instance
+        user.Etudiant.Nom = etudiant.Nom;
+        user.Etudiant.Prenom = etudiant.Prenom;
+        user.Etudiant.Email = etudiant.Email;
+        user.Etudiant.NumEtud = etudiant.NumEtud;
+
         await context.SaveChangesAsync();
     }
+
     public async Task<int> DeleteAsync(long id)
     {
         Etudiant etud = context.Etudiants.Find(id);

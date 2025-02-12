@@ -10,7 +10,6 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
     public async Task<Ue> ExecuteAsync(Ue ue)
     {
         await CheckBusinessRules(ue);
-        //TODO: Vérifier que CreateAsync fonctionne car de base c'était AddAsync()
         await repositoryFactory.UeRepository().CreateAsync(ue);
         await repositoryFactory.SaveChangesAsync();
         return ue;
@@ -33,7 +32,6 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
         List<Ue> ues = await repositoryFactory.UeRepository().FindByConditionAsync(u => u.NumeroUe.Equals(ue.NumeroUe));
         if (ues is { Count: > 0 }) throw new DuplicateUeException(ue.NumeroUe+" - existe déjà");
         
-        //TODO: Vérifier les autres règles métier
     }
     
 }

@@ -1,5 +1,4 @@
-﻿using UniversiteDomain.DataAdapters;
-using UniversiteDomain.DataAdapters.DataAdaptersFactory;
+﻿using UniversiteDomain.DataAdapters.DataAdaptersFactory;
 using UniversiteDomain.Entities;
 
 namespace UniversiteDomain.UseCases.ParcoursUseCases.Create;
@@ -27,8 +26,10 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
         ArgumentNullException.ThrowIfNull(parcours.AnneeFormation);
         ArgumentNullException.ThrowIfNull(repositoryFactory.ParcoursRepository());
         
-        //TODO: Ajouter des règles métiers et les exceptions associées
-        
         //AnnéeFormation supérieure à 0 et est 1 seul caractère, ne se repeat pas
+        if (parcours.AnneeFormation <= 0 || parcours.AnneeFormation > 9)
+        {
+            throw new ArgumentOutOfRangeException(nameof(parcours.AnneeFormation), "L'année de formation doit être comprise entre 1 et 9");
+        }
     }
 }

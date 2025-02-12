@@ -11,8 +11,10 @@ public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
     
     public async Task<Note> ExecuteAsync(float valeurNote, long idEtudiant, long idUe)
     {
-        Etudiant etudiant = await repositoryFactory.EtudiantRepository().FindAsync(idEtudiant);
-        Ue ue = await repositoryFactory.UeRepository().FindAsync(idUe);
+        Etudiant? etudiant = await repositoryFactory.EtudiantRepository().FindAsync(idEtudiant);
+        if(etudiant==null) throw new EtudiantNotFoundException("L'étudiant n'existe pas");
+        Ue? ue = await repositoryFactory.UeRepository().FindAsync(idUe);
+        if(ue==null) throw new UeNotFoundException("L'Ue n'existe pas");
         var note = new Note{ Valeur = valeurNote, Etudiant = etudiant, Ue = ue};
         return await ExecuteAsync(note);
     }
@@ -46,6 +48,11 @@ public class CreateNoteUseCase(IRepositoryFactory repositoryFactory)
         List<Ue> ues = await repositoryFactory.UeRepository().FindByConditionAsync(u => u.Id.Equals(note.Ue.Id));
         if (ues is { Count: 0 }) throw new UeNotFoundException("L'Ue n'existe pas");
 
+    }
+    
+    public bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Scolarite) || role.Equals(Roles.Responsable);
     }
 
 }
