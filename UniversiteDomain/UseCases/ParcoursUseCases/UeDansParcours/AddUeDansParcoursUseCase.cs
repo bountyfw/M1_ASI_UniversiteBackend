@@ -64,5 +64,12 @@ public class AddUeDansParcoursUseCase(IRepositoryFactory repositoryFactory)
             var trouve=inscrites.FindAll(e=>e.Id.Equals(idUe));
             if (trouve.Count > 0) throw new DuplicateUeDansParcoursException(idUe + " est déjà présente dans le parcours : " + idParcours);
         }
+        
     }
+    
+    public bool IsAuthorized(string role)
+    {
+        return role == Roles.Scolarite || role == Roles.Responsable;
+    }
+    
 }

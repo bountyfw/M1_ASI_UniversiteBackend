@@ -12,5 +12,6 @@ public interface IRepository<T> where T : class
     Task<T?> FindAsync(params object[] keyValues);
     Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> condition);
     Task<List<T>> FindAllAsync();
+    void Attach(T entity);
     Task SaveChangesAsync();
 }

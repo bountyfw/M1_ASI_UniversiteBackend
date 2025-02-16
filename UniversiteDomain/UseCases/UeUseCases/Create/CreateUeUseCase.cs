@@ -17,7 +17,11 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
 
     public async Task<Ue> ExecuteAsync(string numero, string intitule)
     {
-        Ue ue = new Ue {Intitule = intitule, NumeroUe = numero};
+        Ue ue = new Ue
+        {
+            Intitule = intitule, 
+            NumeroUe = numero
+        };
         return await ExecuteAsync(ue);
     }
     
@@ -31,7 +35,11 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
         // L'UE doit être unique
         List<Ue> ues = await repositoryFactory.UeRepository().FindByConditionAsync(u => u.NumeroUe.Equals(ue.NumeroUe));
         if (ues is { Count: > 0 }) throw new DuplicateUeException(ue.NumeroUe+" - existe déjà");
-        
+    }
+    
+    public bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Scolarite) || role.Equals(Roles.Responsable);
     }
     
 }

@@ -32,4 +32,9 @@ public class CreateParcoursUseCase(IRepositoryFactory repositoryFactory)
             throw new ArgumentOutOfRangeException(nameof(parcours.AnneeFormation), "L'année de formation doit être comprise entre 1 et 9");
         }
     }
+    
+    public bool IsAuthorized(string role)
+    {
+        return role.Equals(Roles.Scolarite) || role.Equals(Roles.Responsable);
+    }
 }
