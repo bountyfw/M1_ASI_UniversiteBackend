@@ -57,7 +57,7 @@ namespace UniversiteRestApi.Controllers
             Note note = noteDto.ToEntity();
             try
             {   
-                note = await uc.ExecuteAsync(note);
+                note = await uc.ExecuteAsync(note.Valeur, note.EtudiantId, note.UeId);
             }
             catch (Exception e)
             {
@@ -86,7 +86,7 @@ namespace UniversiteRestApi.Controllers
             Note note = noteDto.ToEntity();
             try
             {
-                note = await uc.ExecuteAsync(note);
+                note = await uc.ExecuteAsync(note.EtudiantId, note.UeId, note.Valeur);
             }
             catch (Exception e)
             {
@@ -96,8 +96,8 @@ namespace UniversiteRestApi.Controllers
             return new NoteAvecUeDto().ToDto(note);
         }
 
-        [HttpDelete("{idNote}")]
-        public async Task<ActionResult<NoteAvecUeDto>> DeleteNoteAsync(long idNote)
+        [HttpDelete("{idEtudiant}/{idUe}")]
+        public async Task<ActionResult<NoteAvecUeDto>> DeleteNoteAsync(long idEtudiant, long idUe)
         {
             string role;
             string email;
@@ -114,7 +114,7 @@ namespace UniversiteRestApi.Controllers
             if (!uc.IsAuthorized(role)) return Unauthorized();
             try
             {
-                Note note = await uc.ExecuteAsync(idNote);
+                Note note = await uc.ExecuteAsync(idEtudiant, idUe);
                 return new NoteAvecUeDto().ToDto(note);
             }
             catch (Exception e)

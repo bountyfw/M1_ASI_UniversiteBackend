@@ -17,7 +17,11 @@ public class CreateUeUseCase(IRepositoryFactory repositoryFactory)
 
     public async Task<Ue> ExecuteAsync(string numero, string intitule)
     {
-        Ue ue = new Ue {Intitule = intitule, NumeroUe = numero};
+        Ue ue = new Ue
+        {
+            Intitule = intitule, 
+            NumeroUe = numero
+        };
         return await ExecuteAsync(ue);
     }
     

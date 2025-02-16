@@ -6,10 +6,10 @@ public class Ue
     public string NumeroUe { get; set; } = String.Empty;
     public string Intitule { get; set; } = String.Empty;
     // ManyToMany : une Ue est enseignée dnas plusieurs parcours
-    public virtual List<Parcours>? EnseigneeDans { get; set; } = new();
+    public virtual ICollection<Parcours>? EnseigneeDans { get; set; }
     // OneToMany : une Ue est composée de plusieurs notes
-    public virtual List<Note>? Notes { get; set; } = new();
-    
+    public virtual ICollection<Note>? Notes { get; set; }
+
     public override string ToString()
     {
         return "ID "+Id +" : "+NumeroUe+" - "+Intitule;

@@ -6,7 +6,7 @@ public class NoteAvecUeDto
 {
     public long EtudiantId { get; set; }
     public long UeId { get; set; }
-    public UeDto UeDto{get; set;}
+    public UeDto? UeDto {get; set;}
     public float Valeur { get; set; }
 
     public NoteAvecUeDto ToDto(Note note)

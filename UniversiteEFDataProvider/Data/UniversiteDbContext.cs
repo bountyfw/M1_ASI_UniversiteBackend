@@ -77,12 +77,16 @@ public class UniversiteDbContext : IdentityDbContext<UniversiteUser>
             .HasKey(n => new { n.EtudiantId, n.UeId });
         // ManyToOne vers Etudiant
         modelBuilder.Entity<Note>()
-            .HasOne(n => n.Etudiant)
-            .WithMany(e => e.NotesObtenues);
+            .HasOne(note => note.Etudiant)
+            .WithMany(etudiant => etudiant.NotesObtenues)
+            .HasForeignKey(note => note.EtudiantId)
+            .OnDelete(DeleteBehavior.Restrict);
         // ManyToOne vers Ue
         modelBuilder.Entity<Note>()
-            .HasOne(n => n.Ue)
-            .WithMany(ue => ue.Notes);
+            .HasOne(note => note.Ue)
+            .WithMany(ue => ue.Notes)
+            .HasForeignKey(note => note.UeId)
+            .OnDelete(DeleteBehavior.Restrict);
         
         // Propriétés de la table UniversiteUser
         //OneToOne vers UniversityUser

@@ -175,6 +175,8 @@ namespace UniversiteRestApi.Controllers
         [HttpPost("{parcoursId}/ue/{ueId}")]
         public async Task<IActionResult> AddUeToParcours(long parcoursId, long ueId)
         {
+            Console.WriteLine("ParcoursId: "+parcoursId);
+            Console.WriteLine("UeId: "+ueId);
             string role;
             string email;
             IUniversiteUser? user;

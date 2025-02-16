@@ -6,9 +6,9 @@ namespace UniversiteDomain.UseCases.NoteUseCases.Update;
 
 public class UpdateNoteUseCase(IRepositoryFactory repositoryFactory)
 {
-    public async Task<Note> ExecuteAsync(long idNote, float valeur)
+    public async Task<Note> ExecuteAsync(long idEtudiant, long idUe, float valeur)
     {
-        Note? note = await repositoryFactory.NoteRepository().FindAsync(idNote);
+        Note? note = await repositoryFactory.NoteRepository().FindAsync(idEtudiant, idUe);
         if (note == null) throw new NoteNotFoundException("La note n'existe pas");
         note.Valeur = valeur;
         return await ExecuteAsync(note);

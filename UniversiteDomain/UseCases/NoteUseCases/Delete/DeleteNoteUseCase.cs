@@ -7,9 +7,9 @@ namespace UniversiteDomain.UseCases.NoteUseCases.Delete;
 public class DeleteNoteUseCase(IRepositoryFactory repositoryFactory)
 {
     
-    public async Task<Note> ExecuteAsync(long idNote)
+    public async Task<Note> ExecuteAsync(long idEtudiant, long idUe)
     {
-        Note? note = await repositoryFactory.NoteRepository().FindAsync(idNote);
+        Note? note = await repositoryFactory.NoteRepository().FindAsync(idEtudiant, idUe);
         if(note==null) throw new NoteNotFoundException("La note n'existe pas");
         await CheckBusinessRules(note);
         return await ExecuteAsync(note);
