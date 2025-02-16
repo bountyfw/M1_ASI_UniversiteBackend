@@ -78,17 +78,25 @@ namespace UniversiteRestApi.Controllers
         [HttpGet("{idUe}/export")]
         public async Task<IActionResult> ExportNotes(long idUe)
         {
-            ExporterNotesUseCase useCase = new(repositoryFactory);
+            // Instancier le Use Case pour gérer l'export
+            var useCase = new ExporterNotesUseCase(repositoryFactory);
+
             try
             {
+                // Exécuter le Use Case pour récupérer le contenu CSV
                 var csvContent = await useCase.ExecuteAsync(idUe);
-                return File(Encoding.UTF8.GetBytes(csvContent), "text/csv", $"Notes_UE_{idUe}.csv");
+            
+                // Retourner une réponse HTTP avec le fichier CSV
+                return File(
+                    Encoding.UTF8.GetBytes(csvContent), // Convertir le contenu en bytes UTF-8
+                    "text/csv", // Type MIME du fichier
+                    $"Notes_UE_{idUe}.csv" // Nom du fichier
+                );
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                // Gérer les erreurs métier ou techniques
-                ModelState.AddModelError(nameof(e), e.Message);
-                return ValidationProblem();
+                // En cas d'erreurs, retourner une réponse 400 avec le message d'erreur
+                return BadRequest(new { message = ex.Message });
             }
         }
 
@@ -96,35 +104,26 @@ namespace UniversiteRestApi.Controllers
         public async Task<IActionResult> ImportNotes(long idUe, IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return BadRequest("Aucun fichier fourni.");
+            {
+                return BadRequest("Un fichier CSV valide est requis.");
+            }
 
-            var filePath = Path.GetTempFileName();
+            string csvContent;
+            using (var reader = new StreamReader(file.OpenReadStream()))
+            {
+                csvContent = await reader.ReadToEndAsync();
+            }
+
+            var useCase = new ImporterNotesDepuisCsvUseCase(repositoryFactory);
+
             try
             {
-                // Sauvegarde temporaire du fichier uploadé
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await file.CopyToAsync(stream);
-                }
-
-                // Use Case pour importer les notes.
-                ImporterNotesDepuisCsvUseCase.ImporterNotesUseCase useCase = new(repositoryFactory);
-                var notes = await useCase.ExecuteAsync(idUe, filePath);
-
-                // Optionnel : Retourner les notes importées
-                return Ok(new { message = "Import réussi !", notes });
+                await useCase.ExecuteAsync(idUe, csvContent);
+                return Ok("Les notes ont été importées avec succès.");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                // Gérer les erreurs métier ou techniques
-                ModelState.AddModelError(nameof(e), e.Message);
-                return ValidationProblem();
-            }
-            finally
-            {
-                // Nettoyage du fichier temporaire
-                if (System.IO.File.Exists(filePath))
-                    System.IO.File.Delete(filePath);
+                return BadRequest(new { message = ex.Message });
             }
         }
     }

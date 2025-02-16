@@ -7,6 +7,7 @@ using UniversiteDomain.UseCases.ParcoursUseCases.Create;
 using UniversiteDomain.UseCases.ParcoursUseCases.Update;
 using UniversiteDomain.UseCases.ParcoursUseCases.Delete;
 using UniversiteDomain.UseCases.ParcoursUseCases.EtudiantDansParcours;
+using UniversiteDomain.UseCases.ParcoursUseCases.UeDansParcours;
 
 namespace UniversiteRestApi.Controllers
 {
@@ -96,5 +97,22 @@ namespace UniversiteRestApi.Controllers
             }
             return NoContent();
         }
+        
+        [HttpPost("{parcoursId}/ue/{ueId}")]
+        public async Task<IActionResult> AddUeToParcours(long parcoursId, long ueId)
+        {
+            AddUeDansParcoursUseCase uc = new AddUeDansParcoursUseCase(repositoryFactory);
+            try
+            {
+                await uc.ExecuteAsync(parcoursId, ueId);
+            }
+            catch (Exception e)
+            {
+                ModelState.AddModelError(nameof(e), e.Message);
+                return ValidationProblem();
+            }
+            return NoContent();
+        }
     }
+    
 }

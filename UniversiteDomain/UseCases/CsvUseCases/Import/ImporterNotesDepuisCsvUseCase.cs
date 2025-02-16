@@ -1,4 +1,5 @@
 ﻿using UniversiteDomain.DataAdapters.DataAdaptersFactory;
+using UniversiteDomain.Dtos;
 using UniversiteDomain.Entities;
 
 namespace UniversiteDomain.UseCases.CsvUseCases.Import;
@@ -6,60 +7,72 @@ namespace UniversiteDomain.UseCases.CsvUseCases.Import;
 public class ImporterNotesDepuisCsvUseCase(IRepositoryFactory repositoryFactory)
 {
 
-    public class ImporterNotesUseCase(IRepositoryFactory repositoryFactory)
+    public async Task ExecuteAsync(long idUe, string csvContent)
     {
-        public async Task<List<Note>> ExecuteAsync(long idUe, string filePath)
+        Ue? ue = await repositoryFactory.UeRepository().FindAsync(idUe);
+        if (ue == null)
         {
-            ArgumentNullException.ThrowIfNull(filePath);
+            throw new ArgumentException($"L'UE avec l'ID {idUe} est introuvable.");
+        }
 
-            // Charger l'UE concernée.
-            var ue = await repositoryFactory.UeRepository().FindAsync(idUe);
-            if (ue == null)
-                throw new ArgumentException("L'UE spécifiée est introuvable.");
+        List<Note> notesFromCsv = repositoryFactory.CsvDataAdapterRepository().ImportNotesFromCsv(csvContent);
 
-            // Importer les notes depuis le CSV.
-            var noteDtos = repositoryFactory.CsvDataAdapterRepository().ImportNotesFromCsv(filePath);
+        if (notesFromCsv == null || !notesFromCsv.Any())
+        {
+            throw new ArgumentException("Le fichier CSV est vide ou mal formaté.");
+        }
 
-            // Validation métier et conversion en entités.
-            List<Note> notes = new();
-            foreach (var dto in noteDtos)
+        foreach (Note csvNote in notesFromCsv)
+        {
+            if (csvNote.Etudiant == null)
             {
-                if (dto.UeId != idUe)
-                    throw new ArgumentException($"Une note appartient à une autre UE : {dto.UeId}.");
+                throw new ArgumentException("Le fichier CSV contient une note sans étudiant associé.");
+            }
 
-                if (dto.Valeur is < 0 or > 20)
-                    throw new ArgumentException($"Valeur de note invalide : {dto.Valeur}.");
+            string numEtud = csvNote.Etudiant.NumEtud;
+            Etudiant? etudiant = (await repositoryFactory.EtudiantRepository()
+                .FindByConditionAsync(e => e.NumEtud == numEtud)).FirstOrDefault();
 
-                var etudiant = await repositoryFactory.EtudiantRepository().FindAsync(dto.EtudiantId);
-                if (etudiant == null)
-                    throw new ArgumentException($"L'étudiant avec l'ID {dto.EtudiantId} est introuvable.");
+            if (etudiant == null)
+            {
+                throw new ArgumentException($"L'étudiant avec le numéro {numEtud} n'existe pas dans le système.");
+            }
 
-                // Créer la note validée et prête à sauvegarder.
-                notes.Add(new Note
+            if (csvNote.Ue == null)
+            {
+                throw new ArgumentException("Le fichier CSV mentionne une note sans UE associée.");
+            }
+
+            if (csvNote.Ue.NumeroUe != ue.NumeroUe)
+            {
+                throw new ArgumentException(
+                    $"Un enregistrement dans le fichier CSV mentionne une UE ({csvNote.Ue.NumeroUe}) qui ne correspond pas à l'UE spécifiée ({ue.NumeroUe})."
+                );
+            }
+
+            Note? existingNote = (await repositoryFactory.NoteRepository()
+                .FindByConditionAsync(n => n.EtudiantId == etudiant.Id && n.UeId == idUe))
+                .FirstOrDefault();
+
+            if (existingNote != null)
+            {
+                existingNote.Valeur = csvNote.Valeur; // Met à jour la valeur
+                await repositoryFactory.NoteRepository().UpdateAsync(existingNote);
+            }
+            else
+            {
+                Note newNote = new Note
                 {
-                    Valeur = dto.Valeur,
-                    Etudiant = etudiant,
+                    Valeur = csvNote.Valeur,
                     EtudiantId = etudiant.Id,
-                    Ue = ue,
-                    UeId = ue.Id
-                });
+                    UeId = ue.Id,
+                    Etudiant = etudiant,
+                    Ue = ue
+                };
+                await repositoryFactory.NoteRepository().CreateAsync(newNote);
             }
-
-            // Sauvegarder toutes les notes dans le repository.
-            foreach (var note in notes)
-            {
-                await repositoryFactory.NoteRepository().CreateAsync(note);
-            }
-
-            await repositoryFactory.NoteRepository().SaveChangesAsync();
-
-            return notes;
         }
 
-        public bool IsAuthorized(string role)
-        {
-            // Ex : seuls les responsables peuvent effectuer cette action.
-            return role.Equals(Roles.Responsable);
-        }
+        await repositoryFactory.NoteRepository().SaveChangesAsync();
     }
 }

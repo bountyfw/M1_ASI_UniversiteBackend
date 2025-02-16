@@ -10,7 +10,7 @@ public class GetNotesByEtudiantUseCase(IRepositoryFactory factoryFactory)
     public async Task<List<Note>> ExecuteAsync(long etudiantId)
     {
         await CheckBusinessRules();
-        IUniversiteUser? user = await factoryFactory.UniversiteUserRepository().FindAsync(etudiantId);
+        Etudiant? user = await factoryFactory.EtudiantRepository().FindAsync(etudiantId);
         if (user==null) throw new EtudiantNotFoundException("L'utilisateur n'existe pas");
         
         List<Note> notes = await factoryFactory.NoteRepository().FindByConditionAsync(n => n.Etudiant.Id.Equals(etudiantId));
