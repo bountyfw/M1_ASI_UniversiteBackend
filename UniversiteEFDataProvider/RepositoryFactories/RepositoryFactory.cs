@@ -18,6 +18,7 @@ public class RepositoryFactory (UniversiteDbContext context,
     private INoteRepository? _notes;
     private IUniversiteRoleRepository? _universiteRoles;
     private IUniversiteUserRepository? _universiteUsers;
+    private ICsvDataAdapterRepository? _csvDataAdapter;
     
     public IParcoursRepository ParcoursRepository()
     {
@@ -75,6 +76,15 @@ public class RepositoryFactory (UniversiteDbContext context,
                 _roleManager ?? throw new InvalidOperationException());
         }
         return _universiteUsers;
+    }
+    
+    public ICsvDataAdapterRepository CsvDataAdapterRepository()
+    {
+        if (_csvDataAdapter == null)
+        {
+            _csvDataAdapter = new CsvDataAdapterRepository(context ?? throw new InvalidOperationException());
+        }
+        return _csvDataAdapter;
     }
        
     public async Task SaveChangesAsync()

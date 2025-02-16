@@ -8,6 +8,7 @@ public interface IRepositoryFactory
     INoteRepository NoteRepository();
     IUniversiteUserRepository UniversiteUserRepository();
     IUniversiteRoleRepository UniversiteRoleRepository();
+    ICsvDataAdapterRepository CsvDataAdapterRepository();
     
     // Méthodes de gestion de la dadasource
     // Ce sont des méthodes qui permettent de gérer l'ensemble du data source

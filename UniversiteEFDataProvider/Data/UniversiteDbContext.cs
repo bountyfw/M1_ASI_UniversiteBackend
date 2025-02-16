@@ -21,7 +21,9 @@ public class UniversiteDbContext : IdentityDbContext<UniversiteUser>
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        optionsBuilder.UseLoggerFactory(consoleLogger)  //on lie le contexte avec le système de journalisation
+        optionsBuilder
+            .UseLazyLoadingProxies()
+            .UseLoggerFactory(consoleLogger)  //on lie le contexte avec le système de journalisation
             .EnableSensitiveDataLogging() 
             .EnableDetailedErrors();
     }
@@ -95,6 +97,7 @@ public class UniversiteDbContext : IdentityDbContext<UniversiteUser>
         // Permet d'inclure automatiquement l'étudiant dans le user sans avoir besoin de préciser la jointure
         modelBuilder.Entity<UniversiteUser>().Navigation<Etudiant>(user => user.Etudiant).AutoInclude();
         modelBuilder.Entity<UniversiteRole>();
+        modelBuilder.Entity<Parcours>().Navigation(p => p.Inscrits).AutoInclude();
     }
     
     public DbSet <Parcours>? Parcours { get; set; }
